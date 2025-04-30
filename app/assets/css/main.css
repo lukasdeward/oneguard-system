@@ -3,6 +3,11 @@
 
 @source "../../../content/**/*";
 
+:root {
+  --ui-primary: #002344;
+  --white: #ffffff;
+}
+
 @theme static {
   --font-sans: 'Public Sans', sans-serif;
 

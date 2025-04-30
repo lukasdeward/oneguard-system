@@ -12,15 +12,21 @@ const items = computed(() => [{
   label: 'Blog',
   to: '/blog'
 }])
+
+const colorMode = useColorMode()
+
+const logoUrl = computed(() => {
+  return colorMode.value === 'dark' ? '/oneguard-white.png' : '/oneguard.png'
+})
+
 </script>
 
 <template>
   <UHeader>
     <template #left>
       <NuxtLink to="/">
-        <LogoPro class="w-auto h-6 shrink-0" />
+        <img :src="logoUrl" alt="Logo OneGuard" id="logo" />
       </NuxtLink>
-      <TemplateMenu />
     </template>
 
     <UNavigationMenu
@@ -82,3 +88,10 @@ const items = computed(() => [{
     </template>
   </UHeader>
 </template>
+
+
+<style scoped lang="scss">
+#logo {
+  height: 75px;
+}
+</style>

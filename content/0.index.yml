@@ -1,8 +1,8 @@
-title: Build your SaaS with Nuxt UI Pro
-description: Nuxt UI Pro is a collection of premium Vue components built on top of Nuxt UI to create beautiful & responsive Nuxt applications in minutes. It includes all primitives to build landing pages, documentations, blogs, dashboards or entire SaaS products.
+title: Secure Age Verification for E-Commerce
+description: OneGuard is a powerful age verification solution that helps e-commerce businesses comply with age restrictions while providing a seamless user experience. 
 seo:
-  title: Nuxt UI Pro - SaaS template
-  description: Nuxt UI Pro is a collection of premium Vue components built on top of Nuxt UI to create beautiful & responsive Nuxt applications in minutes.
+  title: OneGuard - Age Verification for E-Commerce
+  description: OneGuard is a powerful age verification solution that helps e-commerce businesses comply with age restrictions while providing a seamless user experience.
 navigation: false
 hero:
   links:
