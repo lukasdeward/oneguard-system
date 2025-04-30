@@ -18,8 +18,13 @@ model merchants {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ongoing_verifications {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shop       String?  @db.VarChar
   email      String?  @db.VarChar
   address    String?  @db.VarChar
+  order_id   String?  @db.VarChar
+  order_value String?  @db.VarChar
+  order_date String?  @db.VarChar
+  order_time String?  @db.VarChar
   created_at DateTime @default(now()) @db.Timestamptz(6)
 }
 
