@@ -10,6 +10,7 @@ datasource db {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model merchants {
   shop         String   @id @db.VarChar
+  key          String   @db.VarChar
   public_proxy String?  @db.VarChar
   created_at   DateTime @default(now()) @db.Timestamptz(6)
 }
