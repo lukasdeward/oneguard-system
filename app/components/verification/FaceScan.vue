@@ -14,15 +14,15 @@
         Similarity: {{ result.similarity }}
       </span>
       <span v-if="result.real !== undefined">
-        Real: {{ result.real }}
+        Anti Spoof check: {{ result.real }}
       </span>
       <span v-if="result.live !== undefined">
         Live: {{ result.live }}
       </span>
 
-      <template v-if="(result.similarity ?? 0) > 0.65 && (result.real ?? 0) > 0.60 && (result.live ?? 0) > 0.90">
+      <div v-if="(result.similarity ?? 0) > 0.50 && (result.real ?? 0) > 0.60 && (result.live ?? 0) > 0.90">
         <span class="text-green-500">Face matched successfully!</span>
-      </template>
+      </div>
     </p>
 
     <template v-if="idCard">
@@ -38,7 +38,6 @@
           class="id-card"
         />
       </div>
-    >
     </template>
 
   </div>
