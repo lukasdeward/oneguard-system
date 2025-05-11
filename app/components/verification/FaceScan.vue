@@ -45,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { em } from '#build/ui-pro/prose';
 import type { Human, Config } from '@vladmandic/human'
 import type { IDCardImages } from '~/types/verification';
 
@@ -161,11 +162,21 @@ async function detectLoop() {
 
     if (similarity > 0.50 && (videoFace.face[0].real ?? 0) > 0.60 && (videoFace.face[0].live ?? 0) > 0.90) {
       console.log('Face matched successfully!')
-      emit('next');
+      emit('next')
     } else {
       console.log('Face not matched')
     }
   } else {
+
+    if (videoFace?.face[0]?.embedding) {
+      console.log('no id card detected');
+    } else if (idFace?.face[0]?.embedding) {
+      console.log('no face in video');
+    } else {
+      console.log('no face or id card detected');
+    }
+
+
     console.log('no face detected');
   }
 

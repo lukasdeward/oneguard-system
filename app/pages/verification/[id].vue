@@ -21,8 +21,11 @@
         :idCard="IdCard"
         @next="nextPage()"
       ></VerificationFaceScan>
-        
 
+      <VerificationDone
+        v-if="item?.component == 'VerificationDone'"
+        @retry="retry()"
+      ></VerificationDone>
 
     </div>
 
@@ -68,6 +71,14 @@ const IdCard = ref<IDCardImages>();
 const nextPage = () => {
   console.log('nextPage')
   stepper.value?.next()
+}
+
+const retry = () => {
+  console.log('retry')
+  stepper.value?.prev()
+  if (stepper.value?.hasPrev) {
+    retry()
+  }
 }
 
 
