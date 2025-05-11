@@ -143,6 +143,8 @@ async function detectLoop() {
 
   const idFace = await human.detect(idCardFront.value)
 
+
+
   if (videoFace?.face[0]?.embedding && idFace.face[0]?.embedding) {
     // draw the results
      const similarity = human.match.similarity(
@@ -154,7 +156,14 @@ async function detectLoop() {
     result.value.real = videoFace.face[0].real
     result.value.live = videoFace.face[0].live
   } else {
-    console.log('no face detected')
+    console.log('no face detected');
+    if (videoFace?.face[0]?.embedding) {
+      result.value.real = videoFace.face[0].real
+      result.value.live = videoFace.face[0].live
+    } 
+    if (idFace?.face[0]?.embedding) {
+      alert('No face in video stream');
+    }
   }
 
  
