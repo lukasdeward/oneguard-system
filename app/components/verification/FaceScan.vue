@@ -52,6 +52,9 @@ const props = defineProps<{
   idCard: IDCardImages | undefined
 }>()
 
+const emit = defineEmits<{
+  (e: 'next'): void
+}>()
 // element refs
 const video = useTemplateRef('video')
 const idCardFront = useTemplateRef('idCardFront') as Ref<HTMLImageElement>
@@ -155,15 +158,15 @@ async function detectLoop() {
     result.value.similarity = similarity
     result.value.real = videoFace.face[0].real
     result.value.live = videoFace.face[0].live
+
+    if (similarity > 0.50 && (videoFace.face[0].real ?? 0) > 0.60 && (videoFace.face[0].live ?? 0) > 0.90) {
+      console.log('Face matched successfully!')
+      emit('next');
+    } else {
+      console.log('Face not matched')
+    }
   } else {
     console.log('no face detected');
-    if (videoFace?.face[0]?.embedding) {
-      result.value.real = videoFace.face[0].real
-      result.value.live = videoFace.face[0].live
-    } 
-    if (idFace?.face[0]?.embedding) {
-      alert('No face in video stream');
-    }
   }
 
  
