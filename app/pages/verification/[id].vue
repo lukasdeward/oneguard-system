@@ -10,16 +10,20 @@
         v-if="item?.component == 'VerificationStart'"
         @next="nextPage()"
       ></VerificationStart>
+
+      <VerificationIdScan
+        v-else-if="item?.component == 'VerificationIdScan'"
+        @next="(response: IDCardImages) => {IdCard = response; nextPage()}"
+      ></VerificationIdScan>
       
       <VerificationFaceScan
         v-if="item?.component == 'VerificationFaceScan'"
+        :idCard="IdCard"
         @next="nextPage()"
       ></VerificationFaceScan>
-      <VerificationIdScan
-        v-else-if="item?.component == 'VerificationIdScan'"
-        @complete="nextPage()"
-      ></VerificationIdScan>
-      
+        
+
+
     </div>
 
     </template>
@@ -33,6 +37,7 @@
 import { VerificationFaceScan } from '#components'
 import type { StepperItem } from '@nuxt/ui'
 import type { Human, Config } from '@vladmandic/human'
+import type { IDCardImages } from '~/types/verification'
 
 const items: StepperItem[] = [
   {
@@ -47,12 +52,21 @@ const items: StepperItem[] = [
     title: 'Face Scan',
     icon: 'i-lucide-camera',
     component: "VerificationFaceScan"
+  },
+  {
+    title: 'Done',
+    icon: 'i-lucide-check',
+    component: "VerificationDone"
   }
 ]
 
 const stepper = useTemplateRef('stepper')
 
+
+const IdCard = ref<IDCardImages>();
+
 const nextPage = () => {
+  console.log('nextPage')
   stepper.value?.next()
 }
 

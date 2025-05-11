@@ -1,30 +1,45 @@
-<!--
-
-CodePen Camera
-==========
-
-A Progressive Web App Camera built using Vue, Tailwind, and WebRTC. Try adding the Debug view to your home screen and read the companion blog to learn more:
-
-[Blog](https://medium.com/@leemartin/how-to-build-a-simple-ios-home-screen-pwa-camera-using-vue-tailwind-and-webrtc-on-codepen-2d61a9754d47?source=friends_link&sk=2ed90bf1e4f52db8491636cebb4b582b)
-
--->
-
 <template>
   <div>
 
-    <canvas id="canvas" class="output"></canvas>
     <!-- hidden video for webcam feed -->
     <video
-      id="video"
+      ref="video"
       class="webcam"
       muted
       playsinline
-      style="display: none;"
     ></video>
-    <!-- status & logs -->
-    <div id="status" class="status"></div>
-    <div id="log" class="log"></div>
-    <div id="performance" class="performance"></div>
+
+    <p>
+      <span v-if="result.similarity !== null">
+        Similarity: {{ result.similarity }}
+      </span>
+      <span v-if="result.real !== undefined">
+        Real: {{ result.real }}
+      </span>
+      <span v-if="result.live !== undefined">
+        Live: {{ result.live }}
+      </span>
+
+      <template v-if="(result.similarity ?? 0) > 0.65 && (result.real ?? 0) > 0.60 && (result.live ?? 0) > 0.90">
+        <span class="text-green-500">Face matched successfully!</span>
+      </template>
+    </p>
+
+    <template v-if="idCard">
+      <div style="display: none;">
+        <img
+          :src="idCard?.front"
+          ref="idCardFront"
+          class="id-card"
+        />
+        <img
+          :src="idCard?.back"
+          alt="ID Card Back"
+          class="id-card"
+        />
+      </div>
+    >
+    </template>
 
   </div>
 
@@ -32,12 +47,25 @@ A Progressive Web App Camera built using Vue, Tailwind, and WebRTC. Try adding t
 
 <script setup lang="ts">
 import type { Human, Config } from '@vladmandic/human'
-import { init } from 'openai/_shims/index.mjs'
+import type { IDCardImages } from '~/types/verification';
+
+const props = defineProps<{
+  idCard: IDCardImages | undefined
+}>()
 
 // element refs
-const videoEl = ref<HTMLVideoElement>()
-const canvasEl = ref<HTMLCanvasElement>()
-const perfEl = ref<HTMLDivElement>()
+const video = useTemplateRef('video')
+const idCardFront = useTemplateRef('idCardFront') as Ref<HTMLImageElement>
+
+const result = ref<{
+  similarity: number | null
+  real: number | undefined
+  live: number | undefined
+}>({
+  similarity: null,
+  real: undefined,
+  live: undefined,
+})
 
 // webcam & Human handles
 let stream: MediaStream
@@ -50,12 +78,21 @@ let fps = 0
 
 // your Human.js config
 const config: Partial<Config> = {
+  filter: { enabled: true, equalization: true }, // lets run with histogram equilizer
   debug: false,
-  face: { enabled: true },
+  face: {
+    enabled: true,
+    detector: { rotation: true, return: true, mask: false }, // return tensor is used to get detected face image
+    description: { enabled: true }, // default model for face descriptor extraction is faceres
+    // mobilefacenet: { enabled: true, modelPath: 'https://vladmandic.github.io/human-models/models/mobilefacenet.json' }, // alternative model
+    // insightface: { enabled: true, modelPath: 'https://vladmandic.github.io/insightface/models/insightface-mobilenet-swish.json' }, // alternative model
+    iris: { enabled: true }, // needed to determine gaze direction
+    antispoof: { enabled: true }, // enable optional antispoof module
+    liveness: { enabled: true }, // enable optional liveness module
+  },
   body: { enabled: false },
   hand: { enabled: false },
   object: { enabled: false },
-  
 }
 
 // 1) Start the webcam
@@ -76,16 +113,11 @@ async function initWebcam() {
   capabilities = track.getCapabilities?.()
   settings = track.getSettings?.()
 
-  if (videoEl.value) {
-    videoEl.value.srcObject = stream
-    videoEl.value.onloadeddata = () => {
+  if (video.value) {
+    video.value.srcObject = stream
+    video.value.onloadeddata = () => {
       // show some performance info
-      perfEl.value!.innerText = JSON.stringify(
-        { label: track.label, settings, capabilities },
-        null,
-        2
-      )
-      videoEl.value!.play()
+      video.value!.play()
       // once the video is live, load Human
       initHuman()
     }
@@ -97,15 +129,7 @@ async function initHuman() {
   const H = await import('@vladmandic/human')
   human = new H.default(config) as Human
 
-  console.log('human version:', human.version, '| tfjs:', human.tf.version['tfjs-core'])
-  console.log('platform:', human.env.platform, '| agent:', human.env.agent)
-  console.log('loading models…')
   await human.load()
-  console.log('backend:', human.tf.getBackend(), '| available:', human.env.backends)
-  console.log(
-    'loaded models:',
-    Object.values(human.models).filter((m) => m).length
-  )
 
   await human.warmup()
 
@@ -114,53 +138,55 @@ async function initHuman() {
 
 // 3) Main detection + draw loop
 async function detectLoop() {
-  if (!videoEl.value || !canvasEl.value) return
+  if (!video.value) return
   // detect on the video element
-  await human.detect(videoEl.value)
+  const videoFace = await human.detect(video.value)
+
+  const idFace = await human.detect(idCardFront.value)
+
+  if (videoFace?.face[0]?.embedding && idFace.face[0]?.embedding) {
+    // draw the results
+     const similarity = human.match.similarity(
+      videoFace.face[0]?.embedding,
+      idFace.face[0]?.embedding
+    )
+
+    result.value.similarity = similarity
+    result.value.real = videoFace.face[0].real
+    result.value.live = videoFace.face[0].live
+  } else {
+    console.log('no face detected')
+  }
+
+ 
 
   // compute FPS
   const now = human.now()
   fps = 1000 / (now - timestamp)
   timestamp = now
 
-  if (videoEl.value.paused) {
+  if (video.value.paused) {
     console.log('Video paused')
   } else {
     // smooth & render
-    const interp = human.next(human.result!)
-    human.draw.canvas(videoEl.value, canvasEl.value)
-    human.draw.all(canvasEl.value, interp)
-    console.log(`fps: ${fps.toFixed(1).padStart(5, ' ')}`)
+    // const interp = human.next(human.result!)
+    // human.draw.canvas(videoEl.value, canvasEl.value)
+    //human.draw.all(canvasEl.value, interp)
   }
+
+  
 
   requestAnimationFrame(detectLoop)
 }
 
 onMounted(() => {
   // grab the elements
-  videoEl.value = document.getElementById(
-    'video'
-  ) as HTMLVideoElement
-  canvasEl.value = document.getElementById(
-    'canvas'
-  ) as HTMLCanvasElement
-  perfEl.value = document.getElementById(
-    'performance'
-  ) as HTMLDivElement
+
+  idCardFront.value = document.getElementById(
+    'idCardFront'
+  ) as HTMLImageElement
 
   // resize canvas when video size changes
-  if (videoEl.value && canvasEl.value) {
-    videoEl.value.onresize = () => {
-      canvasEl.value!.width = videoEl.value!.videoWidth
-      canvasEl.value!.height = videoEl.value!.videoHeight
-    }
-    // pause/play on canvas click
-    canvasEl.value.onclick = () => {
-      videoEl.value!.paused
-        ? videoEl.value!.play()
-        : videoEl.value!.pause()
-    }
-  }
 
   initWebcam()
 
@@ -171,13 +197,7 @@ onMounted(() => {
 .container {
   position: relative;
 }
-.webcam {
-  display: none;
-}
-.output {
-  width: 100%;
-  height: auto;
-}
+
 .status,
 .log,
 .performance {

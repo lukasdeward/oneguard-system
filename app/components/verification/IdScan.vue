@@ -85,6 +85,7 @@
 
 <script lang="ts" setup>
 import { stepper } from '#build/ui'
+import type { IDCardImages } from '~/types/verification'
 
 
 const video = useTemplateRef('video')
@@ -100,11 +101,9 @@ const modalOpen = ref(false)
 
 const loading = ref(false)
 
-type Emit = {
-  (e: 'next'): void
-}
-
-const emit = defineEmits<Emit>()
+const emit = defineEmits<{
+  (e: 'next', IdCard: IDCardImages): void
+}>()
 
 onMounted(() => {
   initWebcam()
@@ -115,8 +114,7 @@ const initWebcam = async () => {
   const constraints: MediaStreamConstraints = {
     audio: false,
     video: {
-      facingMode: 'user',
-      width: { ideal: document.body.clientWidth },
+      facingMode: 'environment',
     },
   }
 
@@ -170,7 +168,18 @@ const submitImage = () => {
     scanType.value = 'back'
   } else {
     // Both images are captured, proceed to the next step
-    emit('next')
+    if (idCardFront.value && idCardBack.value) {
+      emit('next', {
+        front: idCardFront.value,
+        back: idCardBack.value,
+      })
+    } else {
+      console.error('Both images are required')
+      scanType.value = 'front'
+      idCardBack.value = null
+      idCardFront.value = null
+      modalOpen.value = false
+    }
   }
 }
 
@@ -187,15 +196,15 @@ const cancelCurrentImage = () => {
 
 <style>
 .webcam {
-  width: 100%;
-  max-width: 780px;
-  border-radius: 25px;
-  height: 350px;
+    width: 550px;
+    border-radius: 25px;
+    height: 350px;
+    object-fit: cover;
 }
 .overlay {
   position: relative;
-  width: 100%;
-  max-width: 780px;
+  width: 550px;
+  border-radius: 25px;
   height: 350px;
   margin-top: -350px;
   display: flex;
@@ -205,12 +214,24 @@ const cancelCurrentImage = () => {
 }
 
 .id-card {
-  width: 100%;
-  max-width: 600px;
-  height: auto;
+  width: 550px;
   border-radius: 25px;
   height: 350px;
   object-fit: cover;
+}
+
+@media (max-width: 600px) {
+  .webcam, .overlay {
+        width: 365px;
+        height: 230px;
+  }
+  .overlay {
+    margin-top: -230px;
+  }
+  .id-card {
+    width: 365px;
+    height: 230px;
+  }
 }
 
 .id-card-indicator {
