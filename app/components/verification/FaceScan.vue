@@ -193,8 +193,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.container {
-  position: relative;
+.webcam {
+  transform: scaleX(-1);
 }
 
 .status,
