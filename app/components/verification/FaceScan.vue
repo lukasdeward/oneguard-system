@@ -202,13 +202,6 @@ async function detectLoop() {
 }
 
 onMounted(() => {
-  // grab the elements
-
-  idCardFront.value = document.getElementById(
-    'idCardFront'
-  ) as HTMLImageElement
-
-  // resize canvas when video size changes
 
   initWebcam()
 
