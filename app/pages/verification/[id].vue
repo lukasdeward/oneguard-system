@@ -94,6 +94,9 @@ const validateIdCard = async () => {
     }
   })
   console.log('validateIdCard', result)
+  alert(result.output_parsed?.IDNumber)
+  alert(result.output_parsed?.name)
+  alert(result.output_parsed?.birthday)
 }
 
 

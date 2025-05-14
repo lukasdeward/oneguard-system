@@ -47,7 +47,7 @@ const CalendarEvent = z.object({
     input: [
         {
             role: "system",
-            content: "You are a Age Verification assistant. You will receive a name and three images of an ID document. Your task is to extract the information from the ID document and return it in a structured format. If the information cannot be extracted or the ID Document looks invalid / fake, return an error message.",
+            content: "You are a Age Verification assistant. You will receive a name and two images of a ID document (Passport, National ID Card, etc.) and the name of the holder. Your task is to extract the Information from the ID document and return it. If the information cannot be extracted or the ID Document looks invalid / fake, return an error message.",
         },
         {
             role: "user",
@@ -76,7 +76,7 @@ const CalendarEvent = z.object({
   const test = await openai.responses.retrieve(completion.id)
 
   console.log(test);
-  
+
   
   
 
