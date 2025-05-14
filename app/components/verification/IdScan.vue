@@ -17,15 +17,33 @@
             playsinline
           ></video>
       <div class="overlay">
-        <div class="id-card-indicator">
-          <div class="id-card-face-placeholder"></div>
-          <div class="id-card-text-placeholder">
-            <div class="id-card-text-line-placeholder"></div>
-            <div class="id-card-text-line-placeholder"></div>
-            <div class="id-card-text-line-placeholder"></div>
-            <div class="id-card-text-line-placeholder"></div>
+        <template v-if="scanType === 'front'">
+          <div class="id-card-indicator" :class="loading ? 'id-card-loading' : ''">
+            <div class="id-card-face-placeholder"></div>
+            <div class="id-card-text-placeholder">
+              <div class="id-card-text-line-placeholder"></div>
+              <div class="id-card-text-line-placeholder"></div>
+              <div class="id-card-text-line-placeholder"></div>
+              <div class="id-card-text-line-placeholder"></div>
+            </div>
           </div>
-        </div>
+        </template>
+        <template v-else-if="scanType === 'back'">
+          <div class="id-card-indicator" :class="loading ? 'id-card-loading' : ''">
+            <div class="id-card-text-placeholder">
+              <div class="id-card-text-line-placeholder"></div>
+              <div class="id-card-text-line-placeholder"></div>
+              <div class="id-card-text-line-placeholder"></div>
+              <div class="id-card-text-line-placeholder"></div>
+            </div>
+
+            <div class="id-card-text-placeholder">
+              <div class="id-card-text-line-placeholder"></div>
+              <div class="id-card-text-line-placeholder"></div>
+            </div>
+
+          </div>
+        </template>
       </div>
     </div>
 
@@ -44,15 +62,18 @@
           <template #body>
 
             <template v-if="scanType === 'front' && idCardFront">
+
               <div class="flex flex-col items-center justify-center">
-                <h1 class="text-2xl font-bold mb-4">ID Card Front</h1>
-                <img :src="idCardFront" alt="Captured Image" class="id-card" />
+                <h1 class="text-2xl font-bold mb-4">Turn ID Card around</h1>
+                <VerificationDummyIdCardVue />
               </div>
             </template>
-             <template v-else-if="scanType === 'back' && idCardBack">
+             <template v-else-if="scanType === 'back' && idCardBack && idCardFront">
               <div class="flex flex-col items-center justify-center">
                 <h1 class="text-2xl font-bold mb-4">ID Card Back</h1>
                 <img :src="idCardBack" alt="Captured Image" class="id-card" />
+                <img :src="idCardFront" alt="Captured Image" class="id-card" />
+
               </div>
             </template>
             <template v-else>
@@ -66,14 +87,19 @@
           </template>
 
           <template #footer>
-            <UButton label="Submit" color="neutral" class="justify-center" @click="submitImage()" />
-            <UButton
-              label="Cancel"
-              color="neutral"
-              variant="outline"
-              class="justify-center"
-              @click="cancelCurrentImage()"
-            />
+            <template v-if="scanType === 'front'">
+              <UButton label="Continue" color="neutral" class="justify-center" @click="submitImage()" />
+            </template>
+            <template v-else-if="scanType === 'back'">
+              <UButton label="Submit" color="neutral" class="justify-center" @click="submitImage()" />
+              <UButton
+                label="Cancel"
+                color="neutral"
+                variant="outline"
+                class="justify-center"
+                @click="cancelCurrentImage()"
+              />
+            </template>
           </template>
 
       </UDrawer>
@@ -242,6 +268,22 @@ const cancelCurrentImage = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.id-card-loading {
+  border: 2px dashed #19bd19;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .id-card-face-placeholder {

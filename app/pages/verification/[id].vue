@@ -13,7 +13,7 @@
 
       <VerificationIdScan
         v-else-if="item?.component == 'VerificationIdScan'"
-        @next="(response: IDCardImages) => {IdCard = response; nextPage()}"
+        @next="(response: IDCardImages) => {IdCard = response; validateIdCard() ;nextPage()}"
       ></VerificationIdScan>
       
       <VerificationFaceScan
@@ -79,6 +79,21 @@ const retry = () => {
   if (stepper.value?.hasPrev) {
     retry()
   }
+}
+
+const validateIdCard = async () => {
+  const result = await $fetch('/api/verification/verify-document', {
+    method: 'POST',
+    body: {
+      idBack: IdCard.value?.back,
+      idFront: IdCard.value?.front,
+      name: 'Lukas Deward'
+    },
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  console.log('validateIdCard', result)
 }
 
 

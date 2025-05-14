@@ -160,7 +160,7 @@ async function detectLoop() {
     result.value.real = videoFace.face[0].real
     result.value.live = videoFace.face[0].live
 
-    if (similarity > 0.50 && (videoFace.face[0].real ?? 0) > 0.60 && (videoFace.face[0].live ?? 0) > 0.90) {
+    if (similarity > 0.40 && (videoFace.face[0].real ?? 0) > 0.60 && (videoFace.face[0].live ?? 0) > 0.90) {
       console.log('Face matched successfully!')
       emit('next')
     } else {
