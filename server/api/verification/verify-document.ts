@@ -15,35 +15,15 @@ export default defineEventHandler(async (event) => {
     idBack: string;
   };
 
-
-
-const BaseResponseSchema = z.object({
-  status: z.literal("success"),
-  data: z.object({
-    name: z.string(),
-    id_number: z.string(),
-    birthdate: z.string(),
+  const CalendarEvent = z.object({
     id_type: z.string(),
-    id_expiry_date: z.string(),
-    id_country: z.string(),
-    id_state: z.string(),
-    id_city: z.string(),
-    id_address: z.string(),
-    id_postal_code: z.string(),
-    id_issued_date: z.string()
-  }),
- });
-
-
-const CalendarEvent = z.object({
-  id_type: z.string(),
-  name: z.string(),
-  expiry_date: z.date(),
-  birthday: z.date(),
-  country: z.string(),
-  IDNumber: z.string(),
-  address: z.string(),
-});
+    name: z.string(),
+    birthday: z.string(),
+    expiry_date: z.string(),
+    country: z.string(),
+    IDNumber: z.string(),
+    address: z.string(),
+  });
 
   const completion = await openai.responses.parse({
     model: "gpt-4o-2024-08-06",
