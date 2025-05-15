@@ -36,9 +36,13 @@ const BaseResponseSchema = z.object({
 
 
 const CalendarEvent = z.object({
+  id_type: z.string(),
   name: z.string(),
-  birthday: z.string(),
-  IDNumber: z.array(z.string()),
+  expiry_date: z.date(),
+  birthday: z.date(),
+  country: z.string(),
+  IDNumber: z.string(),
+  address: z.string(),
 });
 
   const completion = await openai.responses.parse({
@@ -70,15 +74,6 @@ const CalendarEvent = z.object({
       format: zodTextFormat(CalendarEvent, 'id_card_response'),
     }
   });
-
-  console.log(completion);
-
-  const test = await openai.responses.retrieve(completion.id)
-
-  console.log(test);
-
-  
-  
 
   return completion;
 })

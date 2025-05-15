@@ -27,6 +27,7 @@
         @retry="retry()"
       ></VerificationDone>
 
+      <p>{{ openAIresponse }}</p>
     </div>
 
     </template>
@@ -65,6 +66,7 @@ const items: StepperItem[] = [
 
 const stepper = useTemplateRef('stepper')
 
+const openAIresponse = ref('');
 
 const IdCard = ref<IDCardImages>();
 
@@ -94,9 +96,8 @@ const validateIdCard = async () => {
     }
   })
   console.log('validateIdCard', result)
-  alert(result.output_parsed?.IDNumber)
-  alert(result.output_parsed?.name)
-  alert(result.output_parsed?.birthday)
+
+  openAIresponse.value = result.toString()
 }
 
 
