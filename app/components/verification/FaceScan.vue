@@ -54,7 +54,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'next'): void
+  (e: 'next', result: string): void
 }>()
 // element refs
 const video = useTemplateRef('video')
@@ -78,6 +78,7 @@ let capabilities: MediaTrackCapabilities | undefined
 let human: Human
 let timestamp = 0
 let fps = 0
+let imageCapture: { takePhoto: () => any; }
 
 // your Human.js config
 const config: Partial<Config> = {
@@ -116,6 +117,13 @@ async function initWebcam() {
   capabilities = track.getCapabilities?.()
   settings = track.getSettings?.()
 
+  try {
+    // @ts-ignore
+    imageCapture = new ImageCapture(track)
+  } catch (error) {
+    console.error('Error initializing ImageCapture:', error)
+  }
+
   if (video.value) {
     video.value.srcObject = stream
     video.value.onloadeddata = () => {
@@ -125,6 +133,8 @@ async function initWebcam() {
       initHuman()
     }
   }
+
+  
 }
 
 // 2) Dynamically load & initialize Human
@@ -147,7 +157,10 @@ async function detectLoop() {
 
   const idFace = await human.detect(idCardFront.value)
 
-
+  if (!imageCapture) {
+    console.error('No image capture available')
+    return
+  }
 
   if (videoFace?.face[0]?.embedding && idFace.face[0]?.embedding) {
     // draw the results
@@ -162,7 +175,14 @@ async function detectLoop() {
 
     if (similarity > 0.40 && (videoFace.face[0].real ?? 0) > 0.60 && (videoFace.face[0].live ?? 0) > 0.90) {
       console.log('Face matched successfully!')
-      emit('next')
+      // @ts-ignore
+      const blob = await imageCapture.takePhoto();
+      const facePhoto = URL.createObjectURL(blob);
+      // Deactivate the camera
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop())
+      }
+      emit('next', facePhoto)
     } else {
       console.log('Face not matched')
     }

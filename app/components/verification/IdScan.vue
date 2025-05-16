@@ -117,15 +117,13 @@ import type { IDCardImages } from '~/types/verification'
 const video = useTemplateRef('video')
 
 const stream = ref<MediaStream | null>(null)
-
 const scanType = ref<'front' | 'back'>('front')
-
 const idCardFront = ref<string | null>(null)
 const idCardBack = ref<string | null>(null)
-
 const modalOpen = ref(false)
-
 const loading = ref(false)
+
+let imageCapture: { takePhoto: () => any }
 
 const emit = defineEmits<{
   (e: 'next', IdCard: IDCardImages): void
@@ -144,6 +142,7 @@ const initWebcam = async () => {
     },
   }
 
+  
   try {
     const navigatorStream = await navigator.mediaDevices.getUserMedia(constraints)
     if (video.value) {
@@ -154,11 +153,7 @@ const initWebcam = async () => {
   } catch (error) {
     console.error('Error accessing camera:', error)
   }
-}
 
-
-const captureImage = async () => {
-  loading.value = true
   if (!stream.value) {
     console.error('No stream available')
     return
@@ -168,7 +163,23 @@ const captureImage = async () => {
 
   try {
     // @ts-ignore
-    const imageCapture = new ImageCapture(mediaStreamTrack)
+    imageCapture = new ImageCapture(mediaStreamTrack)
+  } catch (error) {
+    console.error('Error initializing ImageCapture:', error)
+  }
+
+}
+
+
+const captureImage = async () => {
+  loading.value = true
+  if (!imageCapture) {
+    console.error('No stream available')
+    return
+  }
+
+  try {
+    // @ts-ignore
     const blob = await imageCapture.takePhoto()
     const reader = new FileReader()
 
@@ -195,6 +206,10 @@ const submitImage = () => {
   } else {
     // Both images are captured, proceed to the next step
     if (idCardFront.value && idCardBack.value) {
+      // Deactivate the camera
+      if (stream.value) {
+        stream.value.getTracks().forEach((track) => track.stop())
+      }
       emit('next', {
         front: idCardFront.value,
         back: idCardBack.value,

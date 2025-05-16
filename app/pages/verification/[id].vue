@@ -13,17 +13,19 @@
 
       <VerificationIdScan
         v-else-if="item?.component == 'VerificationIdScan'"
-        @next="(response: IDCardImages) => {IdCard = response; validateIdCard() ;nextPage()}"
+        @next="(response: IDCardImages) => {IdCard = response; nextPage()}"
       ></VerificationIdScan>
       
       <VerificationFaceScan
         v-if="item?.component == 'VerificationFaceScan'"
         :idCard="IdCard"
-        @next="nextPage()"
+        @next="(result: string) => {face = result; validateIdCard(); nextPage()}"
       ></VerificationFaceScan>
 
       <VerificationDone
         v-if="item?.component == 'VerificationDone'"
+        :loading="verificationLoading"
+        :error="verificationError"
         @retry="retry()"
       ></VerificationDone>
 
@@ -42,6 +44,9 @@ import { VerificationFaceScan } from '#components'
 import type { StepperItem } from '@nuxt/ui'
 import type { Human, Config } from '@vladmandic/human'
 import type { IDCardImages } from '~/types/verification'
+
+const verificationResult = defineModel('title')
+
 
 const items: StepperItem[] = [
   {
@@ -69,6 +74,10 @@ const stepper = useTemplateRef('stepper')
 const openAIresponse = ref('');
 
 const IdCard = ref<IDCardImages>();
+const face = ref<string>();
+
+const verificationLoading = ref(false)
+const verificationError = ref<string | null>(null)
 
 const nextPage = () => {
   console.log('nextPage')
@@ -84,12 +93,15 @@ const retry = () => {
 }
 
 const validateIdCard = async () => {
+  verificationLoading.value = true
+
   const result = await $fetch('/api/verification/verify-document', {
     method: 'POST',
     body: {
       idBack: IdCard.value?.back,
       idFront: IdCard.value?.front,
-      name: 'Lukas Deward'
+      face: face.value,
+      name: 'Niklas Deward',
     },
     headers: {
       'Content-Type': 'application/json'
@@ -97,7 +109,14 @@ const validateIdCard = async () => {
   })
   console.log('validateIdCard', result)
 
-  openAIresponse.value = result.toString()
+  // @ts-ignore
+  if (openAIresponse.value = result.output[0].content[0].parsed) {
+    console.log('openAIresponse', openAIresponse.value)
+  } else {
+    verificationError.value = 'Verification failed'
+  }
+
+  verificationLoading.value = false
 }
 
 

@@ -21,7 +21,6 @@ model ongoing_verifications {
   shop       String  @db.VarChar
   email      String  @db.VarChar
   name       String  @db.VarChar
-  address    String  @db.VarChar
   order_id   String  @db.VarChar
   order_value String  @db.VarChar
   order_timestamp String  @db.VarChar
@@ -32,7 +31,6 @@ model ongoing_verifications {
 model verifyed_customers {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email      String?  @db.VarChar
-  address    String?  @db.VarChar
-  age        BigInt?
+  birthday   String?
   created_at DateTime @default(now()) @db.Timestamptz(6)
 }

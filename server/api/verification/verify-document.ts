@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
     name: string;
     idFront: string;
     idBack: string;
+    face: string;
   };
 
   const CalendarEvent = z.object({
@@ -31,7 +32,7 @@ export default defineEventHandler(async (event) => {
     input: [
         {
             role: "system",
-            content: "You are a Age Verification assistant. You will receive a name and two images of a ID document (Passport, National ID Card, etc.) and the name of the holder. Your task is to extract the Information from the ID document and return it. If the information cannot be extracted or the ID Document looks invalid / fake, return an error message.",
+            content: "You are a Age Verification assistant. You will receive a name, two images of a ID document (Passport, National ID Card, etc.), a Face of the Holder and the name of the holder. Your task is to extract the Information from the ID document and return it. If the information cannot be extracted or the ID Document looks invalid / fake, return an error message.",
         },
         {
             role: "user",
