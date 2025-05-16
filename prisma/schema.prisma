@@ -9,28 +9,37 @@ datasource db {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model merchants {
-  shop         String   @id @db.VarChar
-  key          String   @db.VarChar
-  public_proxy String?  @db.VarChar
-  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  shop                  String                  @id @db.VarChar
+  public_proxy          String?                 @db.VarChar
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  proxy_key             String
+  display_name          String?
+  necessary_age         Int                     @default(16)
+  face_scan             Boolean                 @default(true)
+  ongoing_verifications ongoing_verifications[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ongoing_verifications {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  shop       String  @db.VarChar
-  email      String  @db.VarChar
-  name       String  @db.VarChar
-  order_id   String  @db.VarChar
-  order_value String  @db.VarChar
-  order_timestamp String  @db.VarChar
-  created_at DateTime @default(now()) @db.Timestamptz(6)
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customer_email  String
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  order_id        String
+  order_name      String
+  shop            String    @db.VarChar
+  order_timestamp DateTime  @db.Date
+  customer_name   String    @db.VarChar
+  address_hash    String
+  done            Boolean   @default(false)
+  merchants       merchants @relation(fields: [shop], references: [shop], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model verifyed_customers {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email      String?  @db.VarChar
-  birthday   String?
-  created_at DateTime @default(now()) @db.Timestamptz(6)
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String?  @db.VarChar
+  address_hash String
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  birthday     DateTime @db.Date
+  card_id      String
 }

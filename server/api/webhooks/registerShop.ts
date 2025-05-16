@@ -10,12 +10,12 @@ export default defineEventHandler(async (event) => {
             shop: body.shop,
         },
         update: {
-            key: body.access_token,
+            proxy_key: body.access_token,
             public_proxy: body.public_proxy,
         },
         create: {
             shop: body.shop,
-            key: body.access_token,
+            proxy_key: body.access_token,
             public_proxy: body.public_proxy,
         },
     });

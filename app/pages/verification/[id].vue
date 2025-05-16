@@ -29,7 +29,6 @@
         @retry="retry()"
       ></VerificationDone>
 
-      <p>{{ openAIresponse }}</p>
     </div>
 
     </template>
@@ -42,10 +41,7 @@
 <script setup lang="ts">
 import { VerificationFaceScan } from '#components'
 import type { StepperItem } from '@nuxt/ui'
-import type { Human, Config } from '@vladmandic/human'
 import type { IDCardImages } from '~/types/verification'
-
-const verificationResult = defineModel('title')
 
 
 const items: StepperItem[] = [
@@ -71,6 +67,10 @@ const items: StepperItem[] = [
 
 const stepper = useTemplateRef('stepper')
 
+const route = useRoute()
+
+const {data: verification} = await useFetch('/api/verification/ongoing-verification?id=' + route.params.id)
+
 const openAIresponse = ref('');
 
 const IdCard = ref<IDCardImages>();
@@ -78,6 +78,7 @@ const face = ref<string>();
 
 const verificationLoading = ref(false)
 const verificationError = ref<string | null>(null)
+
 
 const nextPage = () => {
   console.log('nextPage')
@@ -92,6 +93,7 @@ const retry = () => {
   }
 }
 
+
 const validateIdCard = async () => {
   verificationLoading.value = true
 
@@ -101,7 +103,7 @@ const validateIdCard = async () => {
       idBack: IdCard.value?.back,
       idFront: IdCard.value?.front,
       face: face.value,
-      name: 'Niklas Deward',
+      verification_id: route.params.id,
     },
     headers: {
       'Content-Type': 'application/json'

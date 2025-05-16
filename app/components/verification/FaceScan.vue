@@ -177,8 +177,8 @@ async function detectLoop() {
       console.log('Face matched successfully!')
       // @ts-ignore
       const blob = await imageCapture.takePhoto();
-      const facePhoto = URL.createObjectURL(blob);
-      // Deactivate the camera
+      let facePhoto = await blobToBase64(blob);      
+
       if (stream) {
         stream.getTracks().forEach((track) => track.stop())
       }
@@ -226,6 +226,19 @@ onMounted(() => {
   initWebcam()
 
 })
+
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsDataURL(blob);
+  });
+}
+
 </script>
 
 <style scoped>
