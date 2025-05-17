@@ -38,6 +38,8 @@ export default defineEventHandler(async (event) => {
 
   // @ts-ignore
   const idCard = completion.output[0].content[0].parsed as {
+      verification_success: boolean,
+      verification_certainty: number,
       id_type: string;
       name: string;
       birthday: string;
@@ -51,6 +53,13 @@ export default defineEventHandler(async (event) => {
     return {
       success: false,
       message: 'Verification failed',
+    }
+  }
+
+  if (!idCard.verification_success) {
+    return {
+      success: false,
+      message: 'ID verification failed',
     }
   }
 
@@ -74,7 +83,7 @@ export default defineEventHandler(async (event) => {
     data: {
       email: verification.customer_email,
       address_hash: verification.address_hash,
-      birthday: idCard.birthday,
+      birthday: new Date(idCard.birthday),
       card_id: idCard.IDNumber,
     }
   });

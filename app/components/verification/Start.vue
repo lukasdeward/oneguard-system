@@ -5,6 +5,16 @@
 
     <p class="text-center w-96">Hi {{ customerName }}, please allow Camera Access to proceed with the age verification process. Your images are not saved on our services.</p>
 
+
+    <div class="flex flex-col items-center justify-center gap-10 mt-10">
+      <div class="flex gap-8 items-center justify-center">
+        <UIcon
+        name="i-solar:lamp-bold-duotone"
+        size="35">
+        </UIcon>
+        <p class="text-md text-gray">Check for good lighting during your verification</p>
+      </div>
+    </div>
     <template v-if="showCameraAccessError">
       
       <p class="text-red-500">Camera access is required for age verification.</p>
