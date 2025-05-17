@@ -1,11 +1,13 @@
 <template>
-  <div class="flex flex-col items-center justify-center gap-2">
+  <div class="flex flex-col items-center justify-center gap-2 h-96">
     <template v-if="loading">
       <UIcon
         name="i-line-md:loading-twotone-loop"
+        size="35"
       />
+      <p class="text-center">Checking ID Data</p>
     </template>
-    <template v-else-if="error">
+    <template v-if="error">
       <UButton
         leading-icon="i-lucide-refresh-cw"
         @click="$emit('retry')"
@@ -15,7 +17,7 @@
       </UButton>
       <p class="text-red-500">{{ error }}</p>
     </template>
-    <template v-else>
+    <template v-if="!loading && !error">
       <h2 class="text-2xl font-bold">Verification Complete</h2>
       <p class="text-center">Thank you for completing the verification process.</p>
     </template>
@@ -24,9 +26,15 @@
 
 <script lang="ts" setup>
 
+
 defineProps<{
-  loading: boolean,
   error: String | null
+}>();
+
+const loading = defineModel();
+
+defineEmits<{
+  (e: 'retry'): void
 }>();
 
 </script>

@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col items-center justify-center gap-2">
     
-    <h2 class="text-2xl font-bold">Age Check for your Order #2342</h2>
+    <h2 class="text-2xl font-bold text-center">Age Check for Order {{ orderName }} on {{ shopName }}</h2>
 
-    <p class="text-center">Camera access is required to proceed with the age verification process. Please enable your camera to continue.</p>
+    <p class="text-center w-96">Hi {{ customerName }}, please allow Camera Access to proceed with the age verification process. Your images are not saved on our services.</p>
 
     <template v-if="showCameraAccessError">
       
@@ -15,9 +15,6 @@
       </UButton>
     </template>
 
-
-    <UButton @click="getCameraAccess">Start Age Verification</UButton>
-
   </div>
 </template>
 
@@ -26,6 +23,12 @@
 type Emits = {
   (e: 'next'): void
 }
+
+defineProps<{
+  orderName: string | undefined,
+  customerName: string | undefined,
+  shopName: string | null | undefined,
+}>()
 
 const emit = defineEmits<Emits>()
 

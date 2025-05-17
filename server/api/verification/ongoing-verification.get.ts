@@ -1,22 +1,24 @@
 import { PrismaClient } from "@prisma/client";
+import { OngoingVerificationResponse } from "~~/types/api";
 
 export default defineEventHandler(async (event) => {
 
   const { id } = getQuery(event);
 
-
   if (!id ) {
     return {
       success: false,
       message: 'Verification ID is required',
-    }
+    } as OngoingVerificationResponse;
   }
 
-  if (typeof id === "string" && (/^-|-$/.test(id))) {
+
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (typeof id !== "string" || !uuidRegex.test(id)) {
     return {
       success: false,
       message: 'Verification ID has invalid format',
-    }
+    } as OngoingVerificationResponse;
   }
 
   const prisma = new PrismaClient();
@@ -46,7 +48,7 @@ export default defineEventHandler(async (event) => {
     return {
       success: false,
       message: 'Verification not found',
-    }
+    } as OngoingVerificationResponse;
   }
 
   
@@ -61,5 +63,5 @@ export default defineEventHandler(async (event) => {
       orderName: verifications.order_name,
       orderTimestamp: verifications.order_timestamp,
     },
-  }
+  } as OngoingVerificationResponse;
 })

@@ -47,22 +47,9 @@
       </div>
     </div>
 
-    <UButton
-      class="mt-4"
-      @click="captureImage"
-      leading-icon="i-lucide-camera"
-      :loading="loading"
-      >
-      Capture Image
-    </UButton>
-
-
       <UDrawer v-model:open="modalOpen" should-scale-background set-background-color-on-scale :dismissible="false">
-
           <template #body>
-
             <template v-if="scanType === 'front' && idCardFront">
-
               <div class="flex flex-col items-center justify-center">
                 <h1 class="text-2xl font-bold mb-4">Turn ID Card around</h1>
                 <VerificationDummyIdCardVue />
@@ -73,7 +60,6 @@
                 <h1 class="text-2xl font-bold mb-4">ID Card Back</h1>
                 <img :src="idCardBack" alt="Captured Image" class="id-card" />
                 <img :src="idCardFront" alt="Captured Image" class="id-card" />
-
               </div>
             </template>
             <template v-else>
@@ -82,13 +68,11 @@
                 <p class="text-gray-600">Please capture an image first.</p>
               </div>
             </template>
-            
-            
           </template>
 
           <template #footer>
             <template v-if="scanType === 'front'">
-              <UButton label="Continue" color="neutral" class="justify-center" @click="submitImage()" />
+              <UButton label="Continue" color="neutral" class="justify-center" @click="modalOpen = false; scanType = 'back'" />
             </template>
             <template v-else-if="scanType === 'back'">
               <UButton label="Submit" color="neutral" class="justify-center" @click="submitImage()" />
@@ -101,18 +85,13 @@
               />
             </template>
           </template>
-
       </UDrawer>
 
-    
-    <!-- status & logs -->
   </div>
 </template>
 
 <script lang="ts" setup>
-import { stepper } from '#build/ui'
 import type { IDCardImages } from '~/types/verification'
-
 
 const video = useTemplateRef('video')
 
@@ -121,7 +100,7 @@ const scanType = ref<'front' | 'back'>('front')
 const idCardFront = ref<string | null>(null)
 const idCardBack = ref<string | null>(null)
 const modalOpen = ref(false)
-const loading = ref(false)
+const loading = defineModel()
 
 let imageCapture: { takePhoto: () => any }
 
@@ -167,11 +146,10 @@ const initWebcam = async () => {
   } catch (error) {
     console.error('Error initializing ImageCapture:', error)
   }
-
 }
 
 
-const captureImage = async () => {
+async function captureImage () {
   loading.value = true
   if (!imageCapture) {
     console.error('No stream available')
@@ -190,6 +168,7 @@ const captureImage = async () => {
       } else {
         idCardBack.value = reader.result as string
       }
+
       modalOpen.value = true
     }
   } catch (error) {
@@ -198,7 +177,7 @@ const captureImage = async () => {
   loading.value = false
 }
 
-const submitImage = () => {
+function submitImage() {
   modalOpen.value = false
 
   if (scanType.value === 'front') {
@@ -219,7 +198,6 @@ const submitImage = () => {
       scanType.value = 'front'
       idCardBack.value = null
       idCardFront.value = null
-      modalOpen.value = false
     }
   }
 }
@@ -233,6 +211,9 @@ const cancelCurrentImage = () => {
   }
   modalOpen.value = false
 }
+
+defineExpose({ captureImage });
+
 </script>
 
 <style>
